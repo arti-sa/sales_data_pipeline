@@ -1,0 +1,51 @@
+# Sales Data Pipeline Configuration
+# ==================================
+
+pipeline:
+  name: "SalesDataPipeline"
+  version: "1.0.0"
+
+paths:
+  source: "."
+  staging: "./output/staging"
+  curated: "./output/curated"
+  checkpoints: "./output/checkpoints"
+  logs: "./output/logs"
+
+schema:
+  # Pattern to identify sales columns (regex)
+  sales_column_pattern: "^([A-Z][a-z]{2})_sales$"
+
+  # Static identifier columns
+  identifier_columns:
+    - salesperson_id
+    - salesperson_name
+    - sales_state_id
+    - sales_state_name
+    - store_id
+    - store_name
+    - year
+
+processing:
+  file_pattern: "sales_*.csv"
+  output_format: "parquet"
+  partition_by:
+    - year
+    - month
+
+features:
+  enable_incremental: true
+  enable_schema_registry: true
+  enable_deduplication: true
+  enable_validation: true
+
+validation:
+  reject_negative_sales: true
+  max_sales_value: 1000000000
+
+spark:
+  app_name: "SalesDataPipeline"
+  config:
+    spark.sql.adaptive.enabled: "true"
+    spark.sql.adaptive.coalescePartitions.enabled: "true"
+    spark.sql.sources.partitionOverwriteMode: "dynamic"
